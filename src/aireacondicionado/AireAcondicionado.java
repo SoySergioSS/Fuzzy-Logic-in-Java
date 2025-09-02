@@ -42,6 +42,7 @@ public class AireAcondicionado {
             fis.evaluate();
 
             Variable potencia = fis.getVariable("potencia");
+            JFuzzyChart.get().chart(fis);
 
             System.out.println("===== RESULTADO =====");
             System.out.println("Temperatura: " + temperatura + " °C");
