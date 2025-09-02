@@ -1,0 +1,66 @@
+FUNCTION_BLOCK AireAcondicionado
+
+VAR_INPUT
+    temperatura : REAL;  // 0 - 40 °C
+    humedad     : REAL;  // 0 - 100 %
+    personas    : REAL;  // 0 - 30 personas
+END_VAR
+
+VAR_OUTPUT
+    potencia    : REAL;  // 0 - 100 %
+END_VAR
+
+FUZZIFY temperatura
+    TERM frio := (0,1) (10,1) (18,0);
+    TERM templado := (16,0) (22,1) (26,0);
+    TERM caliente := (24,0) (32,1) (40,1);
+END_FUZZIFY
+
+FUZZIFY humedad
+    TERM baja := (0,1) (20,1) (40,0);
+    TERM media := (30,0) (50,1) (70,0);
+    TERM alta := (60,0) (80,1) (100,1);
+END_FUZZIFY
+
+FUZZIFY personas
+    TERM pocas := (0,1) (3,1) (5,0);
+    TERM moderadas := (4,0) (10,1) (15,0);
+    TERM muchas := (10,0) (20,1) (30,1);
+END_FUZZIFY
+
+DEFUZZIFY potencia
+    TERM baja := (0,1) (15,1) (30,0);
+    TERM media := (25,0) (50,1) (70,0);
+    TERM alta := (60,0) (80,1) (100,1);
+    METHOD : COG;  // Centro de gravedad
+    DEFAULT := 0;  // Valor por defecto
+END_DEFUZZIFY
+
+RULEBLOCK Reglas
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+
+    RULE 1 : IF temperatura IS frio THEN potencia IS baja;
+    RULE 2 : IF temperatura IS templado AND humedad IS media AND personas IS pocas THEN potencia IS baja;
+    RULE 3 : IF temperatura IS templado AND personas IS moderadas THEN potencia IS media;
+    RULE 4 : IF temperatura IS templado AND humedad IS alta AND personas IS muchas THEN potencia IS media;
+    RULE 5 : IF temperatura IS caliente AND humedad IS baja THEN potencia IS media;
+    RULE 6 : IF temperatura IS caliente AND personas IS pocas THEN potencia IS media;
+    RULE 7 : IF temperatura IS caliente AND humedad IS alta AND personas IS muchas THEN potencia IS alta;
+    RULE 8 : IF temperatura IS caliente AND humedad IS media AND personas IS moderadas THEN potencia IS alta;
+    RULE 9 : IF temperatura IS templado AND humedad IS alta AND personas IS muchas THEN potencia IS media;
+    RULE 10: IF temperatura IS frio AND humedad IS alta THEN potencia IS baja;
+    RULE 11 : IF temperatura IS frio AND personas IS moderadas THEN potencia IS baja;
+    RULE 12 : IF temperatura IS frio AND personas IS muchas THEN potencia IS media;
+    RULE 13 : IF temperatura IS templado AND humedad IS baja AND personas IS pocas THEN potencia IS baja;
+    RULE 14 : IF temperatura IS templado AND humedad IS baja AND personas IS moderadas THEN potencia IS media;
+    RULE 15 : IF temperatura IS templado AND humedad IS baja AND personas IS muchas THEN potencia IS media;
+    RULE 16 : IF temperatura IS caliente AND personas IS moderadas AND humedad IS media THEN potencia IS media;
+    RULE 17 : IF temperatura IS caliente AND personas IS pocas AND humedad IS alta THEN potencia IS media;
+    RULE 18 : IF temperatura IS caliente AND personas IS moderadas AND humedad IS alta THEN potencia IS alta;
+    RULE 19 : IF temperatura IS caliente AND personas IS muchas AND humedad IS baja THEN potencia IS alta;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
